@@ -1,42 +1,81 @@
 package resources;
 
+import nl.han.dea.spotitubeherkansing.DTOs.LoginRequestDTO;
+import nl.han.dea.spotitubeherkansing.DTOs.LoginResponseDTO;
+import nl.han.dea.spotitubeherkansing.exceptions.UnauthorizedUserException;
 import nl.han.dea.spotitubeherkansing.resources.LoginResource;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.HttpClientBuilder;
+import nl.han.dea.spotitubeherkansing.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.Response;
 
-import java.io.IOException;
+import java.sql.SQLException;
+import java.util.UUID;
 
-import static org.glassfish.jersey.internal.guava.Predicates.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class LoginResourceTest {
 
-    private LoginResource sut;
+    private LoginResource loginResource;
+
+    private LoginRequestDTO loginRequestDTO;
 
     @BeforeEach
     public void setup(){
-        sut = new LoginResource();
+        loginResource = new LoginResource();
+
+        loginRequestDTO = new LoginRequestDTO();
+        loginRequestDTO.setUsername("testUsername");
+        loginRequestDTO.setPassword("testPassword");
     }
 
     @Test
-    void testTest(){
+    void succesfullLogin() throws SQLException, UnauthorizedUserException {
 
-        assertEquals(1, 1);
+        LoginResponseDTO mockResponse = new LoginResponseDTO(UUID.randomUUID(), "testName");
+
+        UserService userServiceMock = mock(UserService.class);
+        when(userServiceMock.authenticateUser(loginRequestDTO)).thenReturn(mockResponse);
+        loginResource.setUserService(userServiceMock);
+
+
+        Response response = loginResource.login(loginRequestDTO);
+        LoginResponseDTO loginResponseDTO = (LoginResponseDTO) response.getEntity();
+
+
+        assertEquals(Response.Status.OK, response.getStatusInfo());
+        assertEquals(mockResponse, loginResponseDTO);
     }
+
     @Test
-    void return200code() throws IOException {
-        HttpUriRequest request = new HttpGet( "http://localhost:8080/spotitube-herkansing-1.0-SNAPSHOT/" );
+    void failedLogin() throws SQLException, UnauthorizedUserException {
 
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute( request );
+        UserService userServiceMock = mock(UserService.class);
+        when(userServiceMock.authenticateUser(loginRequestDTO)).thenThrow(new UnauthorizedUserException());
+        loginResource.setUserService(userServiceMock);
 
-        assertEquals(202,httpResponse.getStatusLine().getStatusCode());
+
+        Response response = this.loginResource.login(loginRequestDTO);
+
+
+        assertEquals(Response.Status.UNAUTHORIZED, response.getStatusInfo());
+    }
+
+    @Test
+    void failedSQL() throws SQLException, UnauthorizedUserException {
+
+        UserService userServiceMock = mock(UserService.class);
+        when(userServiceMock.authenticateUser(loginRequestDTO)).thenThrow(new SQLException());
+        loginResource.setUserService(userServiceMock);
+
+
+        Response response = this.loginResource.login(loginRequestDTO);
+
+
+        assertEquals(Response.Status.INTERNAL_SERVER_ERROR, response.getStatusInfo());
     }
 
 }
