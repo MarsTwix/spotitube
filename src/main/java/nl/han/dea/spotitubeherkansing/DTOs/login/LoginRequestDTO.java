@@ -1,9 +1,11 @@
-package nl.han.dea.spotitubeherkansing.DTOs;
+package nl.han.dea.spotitubeherkansing.DTOs.login;
 
 import javax.json.bind.annotation.JsonbProperty;
 
 public class LoginRequestDTO {
+    @JsonbProperty("user")
     private String username;
+
     private String password;
 
     public void setUsername(String username) {

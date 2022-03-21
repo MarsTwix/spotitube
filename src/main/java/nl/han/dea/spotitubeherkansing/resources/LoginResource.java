@@ -1,6 +1,6 @@
 package nl.han.dea.spotitubeherkansing.resources;
 
-import nl.han.dea.spotitubeherkansing.DTOs.LoginRequestDTO;
+import nl.han.dea.spotitubeherkansing.DTOs.login.LoginRequestDTO;
 import nl.han.dea.spotitubeherkansing.exceptions.UnauthorizedUserException;
 import nl.han.dea.spotitubeherkansing.services.UserService;
 

@@ -1,7 +1,6 @@
-package nl.han.dea.spotitubeherkansing.DTOs;
+package nl.han.dea.spotitubeherkansing.DTOs.login;
 
 import javax.json.bind.annotation.JsonbProperty;
-import java.util.UUID;
 
 public class LoginResponseDTO {
     @JsonbProperty("token")
@@ -9,8 +8,8 @@ public class LoginResponseDTO {
     @JsonbProperty("user")
     private String name;
 
-    public LoginResponseDTO(UUID token, String name){
-        this.token = token.toString();
+    public LoginResponseDTO(String token, String name){
+        this.token = token;
         this.name = name;
     }
 

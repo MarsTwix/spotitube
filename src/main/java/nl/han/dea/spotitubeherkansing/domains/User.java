@@ -21,5 +21,6 @@ public class User {
         return name;
     }
 
+    public int getId(){return id;}
 
 }

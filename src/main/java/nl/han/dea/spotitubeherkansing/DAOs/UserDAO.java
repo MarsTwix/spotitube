@@ -1,4 +1,4 @@
-package nl.han.dea.spotitubeherkansing.mappers;
+package nl.han.dea.spotitubeherkansing.DAOs;
 
 import nl.han.dea.spotitubeherkansing.DatabaseConnection;
 import nl.han.dea.spotitubeherkansing.domains.User;
@@ -10,12 +10,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UserMapper {
+public class UserDAO {
 
     @Inject
     DatabaseConnection databaseConnection;
 
-    public User find(String username) throws SQLException, UnauthorizedUserException {
+    @Inject
+    UserTokenDAO userTokenDAO;
+
+    public User get(String username) throws SQLException, UnauthorizedUserException {
             Connection con = databaseConnection.get();
             PreparedStatement query = con.prepareStatement("SELECT * FROM user WHERE username = ?");
             query.setString(1, username);
@@ -29,5 +32,9 @@ public class UserMapper {
             String name = results.getString("name");
 
             return new User(id, username, password, name);
+    }
+
+    public User getByToken(String token) throws SQLException, UnauthorizedUserException {
+        return get(userTokenDAO.getUsernameByToken(token));
     }
 }

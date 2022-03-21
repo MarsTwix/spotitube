@@ -1,7 +1,7 @@
 package resources;
 
-import nl.han.dea.spotitubeherkansing.DTOs.LoginRequestDTO;
-import nl.han.dea.spotitubeherkansing.DTOs.LoginResponseDTO;
+import nl.han.dea.spotitubeherkansing.DTOs.login.LoginRequestDTO;
+import nl.han.dea.spotitubeherkansing.DTOs.login.LoginResponseDTO;
 import nl.han.dea.spotitubeherkansing.exceptions.UnauthorizedUserException;
 import nl.han.dea.spotitubeherkansing.resources.LoginResource;
 import nl.han.dea.spotitubeherkansing.services.UserService;
@@ -35,7 +35,7 @@ public class LoginResourceTest {
     @Test
     void succesfullLogin() throws SQLException, UnauthorizedUserException {
 
-        LoginResponseDTO mockResponse = new LoginResponseDTO(UUID.randomUUID(), "testName");
+        LoginResponseDTO mockResponse = new LoginResponseDTO(UUID.randomUUID().toString(), "testName");
 
         UserService userServiceMock = mock(UserService.class);
         when(userServiceMock.authenticateUser(loginRequestDTO)).thenReturn(mockResponse);
