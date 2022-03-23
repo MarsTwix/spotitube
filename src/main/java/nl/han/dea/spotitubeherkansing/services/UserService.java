@@ -44,7 +44,7 @@ public class UserService {
 
     }
 
-    public User getUserByToken(String token) throws SQLException, UnauthorizedUserException {
+    public User authenticateToken(String token) throws SQLException, UnauthorizedUserException {
         return userDAO.getByToken(token);
     }
 

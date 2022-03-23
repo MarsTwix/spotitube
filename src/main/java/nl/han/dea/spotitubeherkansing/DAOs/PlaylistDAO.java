@@ -2,7 +2,6 @@ package nl.han.dea.spotitubeherkansing.DAOs;
 
 import nl.han.dea.spotitubeherkansing.DatabaseConnection;
 import nl.han.dea.spotitubeherkansing.domains.Playlist;
-
 import javax.inject.Inject;
 import java.sql.*;
 import java.util.ArrayList;
@@ -79,5 +78,19 @@ public class PlaylistDAO {
         query.setInt(2, id);
 
         query.executeUpdate();
+    }
+
+    public int getLength(int id) throws SQLException {
+        Connection con = databaseConnection.get();
+
+        PreparedStatement query = con.prepareStatement("SELECT SUM(duration) as length FROM track_in_playlist tip INNER JOIN track t ON tip.track_id = t.id WHERE tip.playlist_id = ? GROUP BY playlist_id");
+        query.setInt(1, id);
+        ResultSet results = query.executeQuery();
+
+        if (!results.next()) {
+            return 0;
+        }
+
+        return results.getInt("length");
     }
 }

@@ -1,14 +1,9 @@
 package nl.han.dea.spotitubeherkansing.DTOs.playlists;
 
-import nl.han.dea.spotitubeherkansing.domains.Track;
-
-import java.util.List;
-
 public class PlaylistDTO {
     private int id;
     private String name;
     private boolean owner;
-    private List<Track> tracks;
 
     public void setId(int id) {
         this.id = id;
@@ -32,13 +27,5 @@ public class PlaylistDTO {
 
     public boolean getOwner() {
         return owner;
-    }
-
-    public void setTracks(List<Track> tracks) {
-        this.tracks = tracks;
-    }
-
-    public List<Track> getTracks() {
-        return tracks;
     }
 }

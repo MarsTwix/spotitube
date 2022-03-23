@@ -28,12 +28,12 @@ public class PlaylistService {
     public void setPlaylistDAO(PlaylistDAO playlistDAO){ this.playlistDAO = playlistDAO; }
 
     public PlaylistsResponseDTO getAllPlaylists(String token) throws SQLException, UnauthorizedUserException {
-        User user = userService.getUserByToken(token);
+        User user = userService.authenticateToken(token);
         return convertPlaylistToResponseDTO(user);
     }
 
     public PlaylistsResponseDTO deletePlaylist(String token, int id) throws SQLException, UnauthorizedUserException, UnautorizedEditException {
-        User user = userService.getUserByToken(token);
+        User user = userService.authenticateToken(token);
         if(isOwner(id, user.getId())){
             playlistDAO.delete(id);
             return convertPlaylistToResponseDTO(user);
@@ -44,13 +44,13 @@ public class PlaylistService {
     }
 
     public PlaylistsResponseDTO addPlaylist(String token, String name) throws SQLException, UnauthorizedUserException {
-        User user = userService.getUserByToken(token);
+        User user = userService.authenticateToken(token);
         playlistDAO.add(name, user.getId());
         return convertPlaylistToResponseDTO(user);
     }
 
     public PlaylistsResponseDTO editPlaylist(String token, int id, String name) throws SQLException, UnauthorizedUserException, UnautorizedEditException {
-        User user = userService.getUserByToken(token);
+        User user = userService.authenticateToken(token);
         if(isOwner(id, user.getId())) {
             playlistDAO.edit(name, id);
             return convertPlaylistToResponseDTO(user);
@@ -60,7 +60,7 @@ public class PlaylistService {
         }
     }
 
-    private boolean isOwner(int id, int ownerId) throws SQLException {
+    public boolean isOwner(int id, int ownerId) throws SQLException {
         Playlist playlist = playlistDAO.get(id);
         return playlist != null && playlist.getOwner() == ownerId;
     }
@@ -68,21 +68,22 @@ public class PlaylistService {
     private PlaylistsResponseDTO convertPlaylistToResponseDTO(User user) throws SQLException {
         List<Playlist> playlists = playlistDAO.getAll();
         List<PlaylistDTO> playlistDTOs = new ArrayList<PlaylistDTO>();
+        int totalLength = 0;
 
-        playlists.forEach((playlist) -> playlistDTOs.add(convertPlaylistToDTO(playlist, user)));
+        for(Playlist playlist: playlists){
+            playlistDTOs.add(convertPlaylistToDTO(playlist, user));
+            totalLength += playlistDAO.getLength(playlist.getId());
+        }
 
-        //TODO: fix length
-        return new PlaylistsResponseDTO(playlistDTOs, 123445);
+        return new PlaylistsResponseDTO(playlistDTOs, totalLength);
     }
 
     private PlaylistDTO convertPlaylistToDTO(Playlist playlist, User user){
-        //TODO: fix tracks
         PlaylistDTO playlistDTO = new PlaylistDTO();
 
         playlistDTO.setId(playlist.getId());
         playlistDTO.setName(playlist.getName());
         playlistDTO.setOwner(playlist.getOwner() == user.getId());
-        playlistDTO.setTracks(null);
 
         return playlistDTO;
     }

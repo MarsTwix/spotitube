@@ -25,10 +25,13 @@ public class PlaylistServiceTest {
     PlaylistService playlistService;
     List<Playlist> playlists = new ArrayList<>();
     PlaylistDAO playlistDAOMock;
-    int id = 1;
+    int id;
     String token = UUID.randomUUID().toString();
-    Playlist playlist = new Playlist(1, "Heavy Metal", 1);
-    Playlist unOwnedPlaylist = new Playlist(2, "Pop", 3);
+    int playlistLength;
+    int unOwnedPlaylistLength;
+    Playlist playlist;
+    Playlist unOwnedPlaylist;
+
 
     @BeforeEach
     public void setup() throws SQLException, UnauthorizedUserException {
@@ -36,11 +39,18 @@ public class PlaylistServiceTest {
 
         UserService userServiceMock = mock(UserService.class);
         User userMock = new User(1,"meron", DigestUtils.sha256Hex("MySuperSecretPassword12341"),"Meron Brouwer");
-        when(userServiceMock.getUserByToken(token)).thenReturn(userMock);
+        when(userServiceMock.authenticateToken(token)).thenReturn(userMock);
         playlistService.setUserService(userServiceMock);
 
+        id = 1;
+        playlistLength = 350;
+        unOwnedPlaylistLength = 423;
+        playlist = new Playlist(1, "Heavy Metal", 1);
+        unOwnedPlaylist = new Playlist(2, "Pop", 3);
 
         playlistDAOMock = mock(PlaylistDAO.class);
+        when(playlistDAOMock.getLength(1)).thenReturn(playlistLength);
+        when(playlistDAOMock.getLength(2)).thenReturn(unOwnedPlaylistLength);
         playlists.add(playlist);
         playlists.add(unOwnedPlaylist);
 
@@ -53,7 +63,7 @@ public class PlaylistServiceTest {
 
         PlaylistsResponseDTO playlistsResponseDTO = playlistService.getAllPlaylists(token);
 
-        assertEquals(123445, playlistsResponseDTO.getLength());
+        assertEquals(playlistLength + unOwnedPlaylistLength, playlistsResponseDTO.getLength());
         assertNotNull(playlistsResponseDTO.getPlaylists());
         assertEquals(2, playlistsResponseDTO.getPlaylists().size());
         assertTrue(playlistsResponseDTO.getPlaylists().get(0).getOwner());
@@ -74,7 +84,7 @@ public class PlaylistServiceTest {
 
         PlaylistsResponseDTO playlistsResponseDTO = playlistService.deletePlaylist(token, id);
 
-        assertEquals(123445, playlistsResponseDTO.getLength());
+        assertEquals(unOwnedPlaylistLength, playlistsResponseDTO.getLength());
         assertNotNull(playlistsResponseDTO.getPlaylists());
         assertEquals(1, playlistsResponseDTO.getPlaylists().size());
 
@@ -107,7 +117,7 @@ public class PlaylistServiceTest {
 
         PlaylistsResponseDTO playlistsResponseDTO = playlistService.addPlaylist(token, "Progressive Rock");
 
-        assertEquals(123445, playlistsResponseDTO.getLength());
+        assertEquals(playlistLength + unOwnedPlaylistLength, playlistsResponseDTO.getLength());
         assertNotNull(playlistsResponseDTO.getPlaylists());
         assertEquals(3, playlistsResponseDTO.getPlaylists().size());
         assertTrue(playlistsResponseDTO.getPlaylists().get(0).getOwner());
@@ -127,7 +137,7 @@ public class PlaylistServiceTest {
 
         PlaylistsResponseDTO playlistsResponseDTO = playlistService.editPlaylist(token, id, newName);
 
-        assertEquals(123445, playlistsResponseDTO.getLength());
+        assertEquals(playlistLength + unOwnedPlaylistLength, playlistsResponseDTO.getLength());
         assertNotNull(playlistsResponseDTO.getPlaylists());
         assertEquals(2, playlistsResponseDTO.getPlaylists().size());
         assertTrue(playlistsResponseDTO.getPlaylists().get(0).getOwner());
