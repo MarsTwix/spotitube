@@ -5,7 +5,7 @@ import nl.han.dea.spotitubeherkansing.domains.Track;
 import java.util.List;
 
 public class TracksResponseDTO {
-    private List<Track> tracks;
+    private final List<Track> tracks;
 
     public TracksResponseDTO(List<Track> tracks){
         this.tracks = tracks;

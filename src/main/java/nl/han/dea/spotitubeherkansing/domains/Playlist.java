@@ -1,9 +1,9 @@
 package nl.han.dea.spotitubeherkansing.domains;
 
 public class Playlist {
-    int id;
+    final int id;
     String name;
-    int owner;
+    final int owner;
 
     public Playlist(int id, String name, int owner){
         this.id = id;

@@ -1,17 +1,16 @@
 package services;
 
-import nl.han.dea.spotitubeherkansing.DAOs.UserTokenDAO;
+import nl.han.dea.spotitubeherkansing.DAOs.UserTokenMySQL;
 import nl.han.dea.spotitubeherkansing.DTOs.login.LoginRequestDTO;
 import nl.han.dea.spotitubeherkansing.DTOs.login.LoginResponseDTO;
 import nl.han.dea.spotitubeherkansing.domains.User;
 import nl.han.dea.spotitubeherkansing.exceptions.UnauthorizedUserException;
-import nl.han.dea.spotitubeherkansing.DAOs.UserDAO;
+import nl.han.dea.spotitubeherkansing.DAOs.UserMySQL;
+import nl.han.dea.spotitubeherkansing.interfaces.DAOs.IUserDAO;
 import nl.han.dea.spotitubeherkansing.services.UserService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -33,16 +32,14 @@ public class UserServiceTest {
         loginRequestDTO.setPassword("MySuperSecretPassword12341");
     }
     @Test
-    void validPassword() throws SQLException, UnauthorizedUserException {
-        UserDAO userDAOMock = mock(UserDAO.class);
+    void validPassword(){
+        IUserDAO userMySQLMock = mock(UserMySQL.class);
         User userMock = new User(1,"meron", DigestUtils.sha256Hex("MySuperSecretPassword12341"),"Meron Brouwer");
-        when(userDAOMock.get(loginRequestDTO.getUsername())).thenReturn(userMock);
-        userService.setUserMapper(userDAOMock);
+        when(userMySQLMock.get(loginRequestDTO.getUsername())).thenReturn(userMock);
+        userService.setUserDAO(userMySQLMock);
 
-        UserTokenDAO userTokenDAOMock = mock(UserTokenDAO.class);
-        String tokenMock = null;
-        when(userTokenDAOMock.tokenExists(tokenMock)).thenReturn(true);
-        userService.setUserTokenDAO(userTokenDAOMock);
+        UserTokenMySQL userTokenMySQLMock = mock(UserTokenMySQL.class);
+        userService.setUserTokenDAO(userTokenMySQLMock);
 
 
         LoginResponseDTO loginResponseDTO = userService.authenticateUser(loginRequestDTO);
@@ -51,39 +48,23 @@ public class UserServiceTest {
         assertEquals(userMock.getName(), loginResponseDTO.getName());
     }
     @Test
-    void invalidPassword() throws SQLException, UnauthorizedUserException {
+    void invalidPassword(){
         User mockUser = new User(1,"meron", DigestUtils.sha256Hex("wrong_password"),"Meron Brouwer");
 
-        UserDAO userDAOMock = mock(UserDAO.class);
-        when(userDAOMock.get(loginRequestDTO.getUsername())).thenReturn(mockUser);
-        userService.setUserMapper(userDAOMock);
+        IUserDAO userMySQLMock = mock(UserMySQL.class);
+        when(userMySQLMock.get(loginRequestDTO.getUsername())).thenReturn(mockUser);
+        userService.setUserDAO(userMySQLMock);
 
-        assertThrows(UnauthorizedUserException.class, () ->{
-            userService.authenticateUser(loginRequestDTO);
-        });
+        assertThrows(UnauthorizedUserException.class, () -> userService.authenticateUser(loginRequestDTO));
     }
 
     @Test
-    void nonExistenceUsername() throws SQLException, UnauthorizedUserException {
+    void nonExistenceUsername(){
 
-        UserDAO userDAOMock = mock(UserDAO.class);
-        when(userDAOMock.get(loginRequestDTO.getUsername())).thenThrow(new UnauthorizedUserException());
-        userService.setUserMapper(userDAOMock);
+        IUserDAO userMySQLMock = mock(UserMySQL.class);
+        when(userMySQLMock.get(loginRequestDTO.getUsername())).thenThrow(new UnauthorizedUserException("Invalid username"));
+        userService.setUserDAO(userMySQLMock);
 
-        assertThrows(UnauthorizedUserException.class, () ->{
-            userService.authenticateUser(loginRequestDTO);
-        });
-    }
-
-    @Test
-    void failedSQL() throws SQLException, UnauthorizedUserException {
-
-        UserDAO userDAOMock = mock(UserDAO.class);
-        when(userDAOMock.get(loginRequestDTO.getUsername())).thenThrow(new SQLException());
-        userService.setUserMapper(userDAOMock);
-
-        assertThrows(SQLException.class, () ->{
-            userService.authenticateUser(loginRequestDTO);
-        });
+        assertThrows(UnauthorizedUserException.class, () -> userService.authenticateUser(loginRequestDTO));
     }
 }

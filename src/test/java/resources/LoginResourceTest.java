@@ -2,7 +2,6 @@ package resources;
 
 import nl.han.dea.spotitubeherkansing.DTOs.login.LoginRequestDTO;
 import nl.han.dea.spotitubeherkansing.DTOs.login.LoginResponseDTO;
-import nl.han.dea.spotitubeherkansing.exceptions.UnauthorizedUserException;
 import nl.han.dea.spotitubeherkansing.resources.LoginResource;
 import nl.han.dea.spotitubeherkansing.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.Response;
 
-import java.sql.SQLException;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +31,7 @@ public class LoginResourceTest {
     }
 
     @Test
-    void succesfullLogin() throws SQLException, UnauthorizedUserException {
+    void successfulLogin(){
 
         LoginResponseDTO mockResponse = new LoginResponseDTO(UUID.randomUUID().toString(), "testName");
 
@@ -48,34 +46,6 @@ public class LoginResourceTest {
 
         assertEquals(Response.Status.OK, response.getStatusInfo());
         assertEquals(mockResponse, loginResponseDTO);
-    }
-
-    @Test
-    void failedLogin() throws SQLException, UnauthorizedUserException {
-
-        UserService userServiceMock = mock(UserService.class);
-        when(userServiceMock.authenticateUser(loginRequestDTO)).thenThrow(new UnauthorizedUserException());
-        loginResource.setUserService(userServiceMock);
-
-
-        Response response = this.loginResource.login(loginRequestDTO);
-
-
-        assertEquals(Response.Status.UNAUTHORIZED, response.getStatusInfo());
-    }
-
-    @Test
-    void failedSQL() throws SQLException, UnauthorizedUserException {
-
-        UserService userServiceMock = mock(UserService.class);
-        when(userServiceMock.authenticateUser(loginRequestDTO)).thenThrow(new SQLException());
-        loginResource.setUserService(userServiceMock);
-
-
-        Response response = this.loginResource.login(loginRequestDTO);
-
-
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR, response.getStatusInfo());
     }
 
 }

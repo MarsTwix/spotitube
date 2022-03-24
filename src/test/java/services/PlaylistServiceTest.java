@@ -1,18 +1,17 @@
 package services;
 
-import nl.han.dea.spotitubeherkansing.DAOs.PlaylistDAO;
+import nl.han.dea.spotitubeherkansing.DAOs.PlaylistMySQL;
 import nl.han.dea.spotitubeherkansing.DTOs.playlists.PlaylistsResponseDTO;
 import nl.han.dea.spotitubeherkansing.domains.Playlist;
 import nl.han.dea.spotitubeherkansing.domains.User;
-import nl.han.dea.spotitubeherkansing.exceptions.UnauthorizedUserException;
-import nl.han.dea.spotitubeherkansing.exceptions.UnautorizedEditException;
+import nl.han.dea.spotitubeherkansing.exceptions.UnauthorizedEditException;
+import nl.han.dea.spotitubeherkansing.interfaces.DAOs.IPlaylistDAO;
 import nl.han.dea.spotitubeherkansing.services.PlaylistService;
 import nl.han.dea.spotitubeherkansing.services.UserService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -24,9 +23,9 @@ import static org.mockito.Mockito.*;
 public class PlaylistServiceTest {
     PlaylistService playlistService;
     List<Playlist> playlists = new ArrayList<>();
-    PlaylistDAO playlistDAOMock;
+    IPlaylistDAO playlistDAOMock;
     int id;
-    String token = UUID.randomUUID().toString();
+    final String token = UUID.randomUUID().toString();
     int playlistLength;
     int unOwnedPlaylistLength;
     Playlist playlist;
@@ -34,7 +33,7 @@ public class PlaylistServiceTest {
 
 
     @BeforeEach
-    public void setup() throws SQLException, UnauthorizedUserException {
+    public void setup(){
         playlistService = new PlaylistService();
 
         UserService userServiceMock = mock(UserService.class);
@@ -48,7 +47,7 @@ public class PlaylistServiceTest {
         playlist = new Playlist(1, "Heavy Metal", 1);
         unOwnedPlaylist = new Playlist(2, "Pop", 3);
 
-        playlistDAOMock = mock(PlaylistDAO.class);
+        playlistDAOMock = mock(PlaylistMySQL.class);
         when(playlistDAOMock.getLength(1)).thenReturn(playlistLength);
         when(playlistDAOMock.getLength(2)).thenReturn(unOwnedPlaylistLength);
         playlists.add(playlist);
@@ -57,7 +56,7 @@ public class PlaylistServiceTest {
     }
 
     @Test
-    void getAllPlaylistsSuccessful() throws SQLException, UnauthorizedUserException {
+    void getAllPlaylistsSuccessful(){
         when(playlistDAOMock.getAll()).thenReturn(playlists);
         playlistService.setPlaylistDAO(playlistDAOMock);
 
@@ -72,7 +71,7 @@ public class PlaylistServiceTest {
     }
 
     @Test
-    void deletePlaylistSuccessful() throws SQLException, UnauthorizedUserException, UnautorizedEditException {
+    void deletePlaylistSuccessful(){
 
         playlists = playlists.stream()
                 .filter(p -> p.getId() != id)
@@ -92,25 +91,25 @@ public class PlaylistServiceTest {
     }
 
     @Test
-    void deletePlaylistNullError() throws SQLException {
+    void deletePlaylistNullError(){
         when(playlistDAOMock.getAll()).thenReturn(playlists);
         when(playlistDAOMock.get(id)).thenReturn(null);
         playlistService.setPlaylistDAO(playlistDAOMock);
 
-        assertThrows(UnautorizedEditException.class, ()-> playlistService.deletePlaylist(token, id));
+        assertThrows(UnauthorizedEditException.class, ()-> playlistService.deletePlaylist(token, id));
     }
 
     @Test
-    void deletePlaylistNullNotOwnerError() throws SQLException {
+    void deletePlaylistNullNotOwnerError(){
         when(playlistDAOMock.getAll()).thenReturn(playlists);
         when(playlistDAOMock.get(id)).thenReturn(unOwnedPlaylist);
         playlistService.setPlaylistDAO(playlistDAOMock);
 
-        assertThrows(UnautorizedEditException.class, ()-> playlistService.deletePlaylist(token, id));
+        assertThrows(UnauthorizedEditException.class, ()-> playlistService.deletePlaylist(token, id));
     }
 
     @Test
-    void addPlaylistSuccessful() throws SQLException, UnauthorizedUserException {
+    void addPlaylistSuccessful(){
         playlists.add(new Playlist(3, "Progressive Rock", 1));
         when(playlistDAOMock.getAll()).thenReturn(playlists);
         playlistService.setPlaylistDAO(playlistDAOMock);
@@ -127,7 +126,7 @@ public class PlaylistServiceTest {
     }
 
     @Test
-    void editPlaylistSuccessful() throws SQLException, UnauthorizedUserException, UnautorizedEditException {
+    void editPlaylistSuccessful(){
         String newName = "Death Metal";
         playlist.setName(newName);
         when(playlistDAOMock.get(id)).thenReturn(playlist);
@@ -147,24 +146,24 @@ public class PlaylistServiceTest {
     }
 
     @Test
-    void editPlaylistNullError() throws SQLException {
+    void editPlaylistNullError(){
         String newName = "Death Metal";
         when(playlistDAOMock.get(id)).thenReturn(null);
         when(playlistDAOMock.getAll()).thenReturn(playlists);
         playlistService.setPlaylistDAO(playlistDAOMock);
 
-        assertThrows(UnautorizedEditException.class, ()-> playlistService.editPlaylist(token, id, newName));
+        assertThrows(UnauthorizedEditException.class, ()-> playlistService.editPlaylist(token, id, newName));
 
     }
 
     @Test
-    void editPlaylistNotOwnerError() throws SQLException {
+    void editPlaylistNotOwnerError(){
         String newName = "Death Metal";
         when(playlistDAOMock.get(id)).thenReturn(unOwnedPlaylist);
         when(playlistDAOMock.getAll()).thenReturn(playlists);
         playlistService.setPlaylistDAO(playlistDAOMock);
 
-        assertThrows(UnautorizedEditException.class, ()-> playlistService.editPlaylist(token, id, newName));
+        assertThrows(UnauthorizedEditException.class, ()-> playlistService.editPlaylist(token, id, newName));
 
     }
 }

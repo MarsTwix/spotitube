@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class DatabaseConnection {
-    private Properties properties;
+    private final Properties properties;
 
     public DatabaseConnection() {
         properties = new Properties();

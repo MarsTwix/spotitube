@@ -5,27 +5,36 @@ public class PlaylistDTO {
     private String name;
     private boolean owner;
 
-    public void setId(int id) {
+    public PlaylistDTO() {
+    }
+
+    public PlaylistDTO(int id, String name, boolean owner) {
         this.id = id;
+        this.name = name;
+        this.owner = owner;
     }
 
     public int getId() {
         return id;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setOwner(boolean owner) {
-        this.owner = owner;
-    }
-
     public boolean getOwner() {
         return owner;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setOwner(boolean owner) {
+        this.owner = owner;
     }
 }

@@ -1,31 +1,31 @@
 package nl.han.dea.spotitubeherkansing.services;
 
-import nl.han.dea.spotitubeherkansing.DAOs.UserTokenDAO;
 import nl.han.dea.spotitubeherkansing.DTOs.login.LoginRequestDTO;
 import nl.han.dea.spotitubeherkansing.DTOs.login.LoginResponseDTO;
 import nl.han.dea.spotitubeherkansing.domains.User;
 import nl.han.dea.spotitubeherkansing.exceptions.UnauthorizedUserException;
-import nl.han.dea.spotitubeherkansing.DAOs.UserDAO;
+import nl.han.dea.spotitubeherkansing.interfaces.DAOs.IUserDAO;
+import nl.han.dea.spotitubeherkansing.interfaces.DAOs.IUserTokenDAO;
+import nl.han.dea.spotitubeherkansing.interfaces.services.IUserService;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.inject.Inject;
-import java.sql.SQLException;
 import java.util.UUID;
 
-public class UserService {
+public class UserService implements IUserService {
 
-    private UserDAO userDAO;
-
-    @Inject
-    public void setUserMapper(UserDAO userDAO){ this.userDAO = userDAO; }
-
-
-    private UserTokenDAO userTokenDAO;
+    private IUserDAO userDAO;
 
     @Inject
-    public void setUserTokenDAO(UserTokenDAO userTokenDAO){ this.userTokenDAO = userTokenDAO; }
+    public void setUserDAO(IUserDAO userDAO){ this.userDAO = userDAO; }
 
-    public LoginResponseDTO authenticateUser(LoginRequestDTO request) throws SQLException, UnauthorizedUserException {
+
+    private IUserTokenDAO userTokenDAO;
+
+    @Inject
+    public void setUserTokenDAO(IUserTokenDAO userTokenDAO){ this.userTokenDAO = userTokenDAO; }
+
+    public LoginResponseDTO authenticateUser(LoginRequestDTO request) {
         User user = getUser(request.getUsername());
         if(isPasswordValid(request.getPassword(), user.getPassword())){
             String token;
@@ -39,20 +39,20 @@ public class UserService {
             return new LoginResponseDTO(token, user.getName());
         }
         else{
-            throw new UnauthorizedUserException();
+            throw new UnauthorizedUserException("Invalid username or password!");
         }
 
     }
 
-    public User authenticateToken(String token) throws SQLException, UnauthorizedUserException {
+    public User authenticateToken(String token) {
         return userDAO.getByToken(token);
     }
 
-    private User getUser(String username) throws SQLException, UnauthorizedUserException {
+    private User getUser(String username) {
         return userDAO.get(username);
     }
 
-    private boolean isPasswordValid(String givenPassword, String recievedPassword){
-        return DigestUtils.sha256Hex(givenPassword).equals(recievedPassword);
+    private boolean isPasswordValid(String givenPassword, String receivedPassword){
+        return DigestUtils.sha256Hex(givenPassword).equals(receivedPassword);
     }
 }

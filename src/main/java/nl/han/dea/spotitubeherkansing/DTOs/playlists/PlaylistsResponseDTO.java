@@ -3,8 +3,8 @@ package nl.han.dea.spotitubeherkansing.DTOs.playlists;
 import java.util.List;
 
 public class PlaylistsResponseDTO {
-    List<PlaylistDTO> playlists;
-    int length;
+    final List<PlaylistDTO> playlists;
+    final int length;
 
     public PlaylistsResponseDTO(List<PlaylistDTO> playlists, int length){
         this.playlists = playlists;

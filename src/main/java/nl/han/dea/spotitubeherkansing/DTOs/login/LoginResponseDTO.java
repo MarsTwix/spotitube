@@ -4,9 +4,9 @@ import javax.json.bind.annotation.JsonbProperty;
 
 public class LoginResponseDTO {
     @JsonbProperty("token")
-    private String token;
+    private final String token;
     @JsonbProperty("user")
-    private String name;
+    private final String name;
 
     public LoginResponseDTO(String token, String name){
         this.token = token;
